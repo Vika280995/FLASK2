@@ -1,7 +1,7 @@
 from flask import Flask, render_template,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from models import db, Item
-
+from cloudipsp import Api, Checkout
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///shop.db'
@@ -21,6 +21,15 @@ db.init_app(app)
         #return self.title
 
 #db.create_all()
+
+api = Api(merchant_id=1396424,
+          secret_key='test')
+checkout = Checkout(api=api)
+data = {
+    "currency": "USD",
+    "amount": 10000
+}
+url = checkout.url(data).get('checkout_url')
 
 @app.route('/')
 def index():
