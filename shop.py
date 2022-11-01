@@ -22,18 +22,10 @@ db.init_app(app)
 
 #db.create_all()
 
-api = Api(merchant_id=1396424,
-          secret_key='test')
-checkout = Checkout(api=api)
-data = {
-    "currency": "USD",
-    "amount": 10000
-}
-url = checkout.url(data).get('checkout_url')
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    items = Item.query.order_by(Item.price).all()
+    return render_template('index.html',data=items)
 
 @app.route('/createdb')
 def createdb():
@@ -66,6 +58,20 @@ def create():
 @app.route('/addition')
 def addition():
     return render_template('addition.html')
+
+@app.route('/order/<int:id>',methods=['POST','GET'])
+def order(id):
+    item = Item.query.get(id)
+    api = Api(merchant_id=1396424,
+              secret_key='test')
+    checkout = Checkout(api=api)
+    data = {
+        "currency": "BYN",
+        "amount": int(item.price)*100,
+        "order_desc": item.title
+    }
+    url = checkout.url(data).get('checkout_url')
+    return redirect(url)
 
 if __name__ == '__main__':
     app.run(debug=True)
